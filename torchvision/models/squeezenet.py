@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import torch.utils.model_zoo as model_zoo
 
 
@@ -77,7 +78,7 @@ class SqueezeNet(nn.Module):
                 Fire(512, 64, 256, 256),
             )
         # Final convolution is initialized differently form the rest
-        final_conv = nn.Conv2d(512, num_classes, kernel_size=1)
+        final_conv = nn.Conv2d(512, self.num_classes, kernel_size=1)
         self.classifier = nn.Sequential(
             nn.Dropout(p=0.5),
             final_conv,
@@ -87,13 +88,10 @@ class SqueezeNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                gain = 2.0
                 if m is final_conv:
-                    m.weight.data.normal_(0, 0.01)
+                    init.normal(m.weight.data, mean=0.0, std=0.01)
                 else:
-                    fan_in = m.kernel_size[0] * m.kernel_size[1] * m.in_channels
-                    u = math.sqrt(3.0 * gain / fan_in)
-                    m.weight.data.uniform_(-u, u)
+                    init.kaiming_uniform(m.weight.data)
                 if m.bias is not None:
                     m.bias.data.zero_()
 

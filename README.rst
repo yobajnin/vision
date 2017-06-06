@@ -172,7 +172,7 @@ STL10
     anything.
 
 SVHN
-~~~~~
+~~~~
 
 ``dset.SVHN(root, split='train', transform=None, target_transform=None, download=False)``
 
@@ -307,9 +307,11 @@ Transforms on PIL.Image
 ``Scale(size, interpolation=Image.BILINEAR)``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Rescales the input PIL.Image to the given 'size'. 'size' will be the
-size of the smaller edge.
+Rescales the input PIL.Image to the given 'size'. 
 
+If 'size' is a 2-element tuple or list in the order of (width, height), it will be the exactly size to scale.
+
+If 'size' is a number, it will indicate the size of the smaller edge. 
 For example, if height > width, then image will be rescaled to (size \*
 height / width, size) - size: size of the smaller edge - interpolation:
 Default: PIL.Image.BILINEAR
@@ -388,7 +390,7 @@ For example:
 Utils
 =====
 
-make\_grid(tensor, nrow=8, padding=2, normalize=False, range=None, scale\_each=False)
+make\_grid(tensor, nrow=8, padding=2, normalize=False, range=None, scale\_each=False, pad\_value=0)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Given a 4D mini-batch Tensor of shape (B x C x H x W),
@@ -404,9 +406,11 @@ normalize the image.
 scale_each=True will scale each image in the batch of images separately rather than
 computing the (min, max) over all images.
 
+pad_value=<float> sets the value for the padded pixels.
+
 `Example usage is given in this notebook` <https://gist.github.com/anonymous/bf16430f7750c023141c562f3e9f2a91>
 
-save\_image(tensor, filename, nrow=8, padding=2, normalize=False, range=None, scale\_each=False)
+save\_image(tensor, filename, nrow=8, padding=2, normalize=False, range=None, scale\_each=False, pad\_value=0)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Saves a given Tensor into an image file.

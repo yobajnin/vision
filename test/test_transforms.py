@@ -3,6 +3,14 @@ import torchvision.transforms as transforms
 import unittest
 import random
 import numpy as np
+from PIL import Image
+try:
+    import accimage
+except ImportError:
+    accimage = None
+
+
+GRACE_HOPPER = 'assets/grace_hopper_517x606.jpg'
 
 
 class Tester(unittest.TestCase):
@@ -59,14 +67,38 @@ class Tester(unittest.TestCase):
             transforms.Scale(osize),
             transforms.ToTensor(),
         ])(img)
-        # print img.size()
-        # print 'output size:', osize
-        # print result.size()
         assert osize in result.size()
         if height < width:
             assert result.size(1) <= result.size(2)
         elif width < height:
             assert result.size(1) >= result.size(2)
+
+        result = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Scale([osize, osize]),
+            transforms.ToTensor(),
+        ])(img)
+        assert osize in result.size()
+        assert result.size(1) == osize
+        assert result.size(2) == osize
+
+        oheight = random.randint(5, 12) * 2
+        owidth = random.randint(5, 12) * 2
+        result = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Scale((owidth, oheight)),
+            transforms.ToTensor(),
+        ])(img)
+        assert result.size(1) == oheight
+        assert result.size(2) == owidth
+
+        result = transforms.Compose([
+            transforms.ToPILImage(),
+            transforms.Scale([owidth, oheight]),
+            transforms.ToTensor(),
+        ])(img)
+        assert result.size(1) == oheight
+        assert result.size(2) == owidth
 
     def test_random_crop(self):
         height = random.randint(10, 32) * 2
@@ -128,6 +160,45 @@ class Tester(unittest.TestCase):
         output = trans(ndarray)
         expected_output = ndarray.transpose((2, 0, 1)) / 255.0
         assert np.allclose(output.numpy(), expected_output)
+
+    @unittest.skipIf(accimage is None, 'accimage not available')
+    def test_accimage_to_tensor(self):
+        trans = transforms.ToTensor()
+
+        expected_output = trans(Image.open(GRACE_HOPPER).convert('RGB'))
+        output = trans(accimage.Image(GRACE_HOPPER))
+
+        self.assertEqual(expected_output.size(), output.size())
+        assert np.allclose(output.numpy(), expected_output.numpy())
+
+    @unittest.skipIf(accimage is None, 'accimage not available')
+    def test_accimage_resize(self):
+        trans = transforms.Compose([
+            transforms.Scale(256, interpolation=Image.LINEAR),
+            transforms.ToTensor(),
+        ])
+
+        expected_output = trans(Image.open(GRACE_HOPPER).convert('RGB'))
+        output = trans(accimage.Image(GRACE_HOPPER))
+
+        self.assertEqual(expected_output.size(), output.size())
+        self.assertLess(np.abs((expected_output - output).mean()), 1e-3)
+        self.assertLess((expected_output - output).var(), 1e-5)
+        # note the high absolute tolerance
+        assert np.allclose(output.numpy(), expected_output.numpy(), atol=5e-2)
+
+    @unittest.skipIf(accimage is None, 'accimage not available')
+    def test_accimage_crop(self):
+        trans = transforms.Compose([
+            transforms.CenterCrop(256),
+            transforms.ToTensor(),
+        ])
+
+        expected_output = trans(Image.open(GRACE_HOPPER).convert('RGB'))
+        output = trans(accimage.Image(GRACE_HOPPER))
+
+        self.assertEqual(expected_output.size(), output.size())
+        assert np.allclose(output.numpy(), expected_output.numpy())
 
     def test_tensor_to_pil_image(self):
         trans = transforms.ToPILImage()
