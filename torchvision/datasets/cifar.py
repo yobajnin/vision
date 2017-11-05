@@ -32,7 +32,7 @@ class CIFAR10(data.Dataset):
 
     """
     base_folder = 'cifar-10-batches-py'
-    url = "http://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
+    url = "https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz"
     filename = "cifar-10-python.tar.gz"
     tgz_md5 = 'c58f30108f718f92721af3b95e74349a'
     train_list = [
@@ -50,7 +50,7 @@ class CIFAR10(data.Dataset):
     def __init__(self, root, train=True,
                  transform=None, target_transform=None,
                  download=False):
-        self.root = root
+        self.root = os.path.expanduser(root)
         self.transform = transform
         self.target_transform = target_transform
         self.train = train  # training set or test set
@@ -68,7 +68,7 @@ class CIFAR10(data.Dataset):
             self.train_labels = []
             for fentry in self.train_list:
                 f = fentry[0]
-                file = os.path.join(root, self.base_folder, f)
+                file = os.path.join(self.root, self.base_folder, f)
                 fo = open(file, 'rb')
                 if sys.version_info[0] == 2:
                     entry = pickle.load(fo)
@@ -86,7 +86,7 @@ class CIFAR10(data.Dataset):
             self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
         else:
             f = self.test_list[0][0]
-            file = os.path.join(root, self.base_folder, f)
+            file = os.path.join(self.root, self.base_folder, f)
             fo = open(file, 'rb')
             if sys.version_info[0] == 2:
                 entry = pickle.load(fo)
@@ -128,9 +128,9 @@ class CIFAR10(data.Dataset):
 
     def __len__(self):
         if self.train:
-            return 50000
+            return len(self.train_data)
         else:
-            return 10000
+            return len(self.test_data)
 
     def _check_integrity(self):
         root = self.root
@@ -161,8 +161,12 @@ class CIFAR10(data.Dataset):
 
 
 class CIFAR100(CIFAR10):
+    """`CIFAR100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
+
+    This is a subclass of the `CIFAR10` Dataset.
+    """
     base_folder = 'cifar-100-python'
-    url = "http://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
+    url = "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
     filename = "cifar-100-python.tar.gz"
     tgz_md5 = 'eb9058c3a382ffc7106e4002c42a8d85'
     train_list = [
