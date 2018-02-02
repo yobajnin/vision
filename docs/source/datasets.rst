@@ -30,6 +30,16 @@ MNIST
 
 .. autoclass:: MNIST
 
+Fashion-MNIST
+~~~~~~~~~~~~~
+
+.. autoclass:: FashionMNIST
+
+EMNIST
+~~~~~~
+
+.. autoclass:: EMNIST
+
 COCO
 ~~~~
 
