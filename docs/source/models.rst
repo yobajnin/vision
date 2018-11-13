@@ -36,6 +36,15 @@ These can be constructed by passing ``pretrained=True``:
     densenet = models.densenet161(pretrained=True)
     inception = models.inception_v3(pretrained=True)
 
+Instancing a pre-trained model will download its weights to a cache directory.
+This directory can be set using the `TORCH_MODEL_ZOO` environment variable. See
+:func:`torch.utils.model_zoo.load_url` for details.
+
+Some models use modules which have different training and evaluation
+behavior, such as batch normalization. To switch between these modes, use
+``model.train()`` or ``model.eval()`` as appropriate. See
+:meth:`~torch.nn.Module.train` or :meth:`~torch.nn.Module.eval` for details. 
+
 All pre-trained models expect input images normalized in the same way,
 i.e. mini-batches of 3-channel RGB images of shape (3 x H x W),
 where H and W are expected to be at least 224.
